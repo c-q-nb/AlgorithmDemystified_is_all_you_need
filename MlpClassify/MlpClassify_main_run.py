@@ -1,7 +1,7 @@
 from sklearn.metrics import accuracy_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_iris
-from MlpRegression import MlpNetwork, preprocess_data
+from MlpClassify import MlpNetwork, preprocess_data
 import numpy as np
 
 # 加载数据集 取两种类别的燕尾花
