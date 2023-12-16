@@ -1,13 +1,12 @@
 # 经典的机器学习算法和神经网络算法的原理实现是你所需要的
 
-Welcome to here
+吴恩达：机器学习的六个经典核心算法永不过时。随着人工智能技术爆炸增长，吴恩达团队表示，机器学习领域有些经典的算法在历史的演变中经得起时间的考验。(**线性回归、逻辑回归、决策树、K-Means聚类、神经网络、梯度下降**)
 
 ## 内容列表
 
 - [项目背景](#项目背景)
-- [安装](#安装)
-- [使用说明](#使用说明)
-	- [生成器](#生成器)
+- [项目结构](#项目结构)
+- [如何使用](#如何使用)
 - [徽章](#徽章)
 - [示例](#示例)
 - [相关仓库](#相关仓库)
@@ -17,44 +16,19 @@ Welcome to here
 
 ## 项目背景
 
-`标准 Readme` 最开始因为 [@maxogden](https://github.com/maxogden) 在项目 [feross/standard](https://github.com/feross/standard) 的[这个 Issue](https://github.com/feross/standard/issues/141) 中提出，是否标准化 README 会有助于帮助大家。很多人在仓库 [zcei's standard-readme](https://github.com/zcei/standard-readme/issues/1) 就这个想法进行了讨论。在我维护仓库 [IPFS](https://github.com/ipfs) 的时候，我需要在这个组织中推广标准化的 Readme，因此这个项目也就从这开始了。
+如果你想深入了解经典机器学习算法的原理及其代码实现，那么这个项目将非常适合你。这个项目是一个集合了传统机器学习算法和深度学习算法的库。它包括线性回归，逻辑回归，决策树，K-means，感知机网络等算法。项目的目标是提供一个易于使用，同时又具有高度可定制性的机器学习库。通过经典实现回归，分类，聚类等任务。
+## 项目结构
 
-> 如果你的文档是完整的，那么使用你代码的人就不用再去看代码了。这非常的重要。它使得你可以分离接口文档与具体实现。它意味着你可修改实现的代码而保持接口与文档不变。
+项目的结构清晰且易于理解。每个算法都有一个单独的文件夹，文件夹的名字就是算法的名称。每个文件夹下都有两个Python文件：
 
-> 请记住：是文档而非代码，定义了一个模块的功能。
+(模型名称)_main_run.py：这个文件主要负责数据的加载，预处理，模型的训练，预测以及结果的展示。它为用户提供了一个方便的使用界面，用户可以通过这个文件快速地使用该算法。
+(模型名称).py：这个文件是算法的核心实现。它包括模型的训练和预测功能。这个文件为那些希望深入了解算法工作原理的用户提供了详细的实现。
 
-—— [Ken Williams, Perl Hackers](http://mathforum.org/ken/perl_modules.html#document)
+## 如何使用
 
-写 README 从某种程度上来说相当不易，一直维护下去更是难能可贵。如果可以减少这个过程，则可以让写代码与修改代码更容易，使得是否在说明中指明一处修改有无必要更加清楚，你可以花费更少的时间来考虑是否你最初的文档是否需要更新，你可以分配更多的时间来写代码而非维护文档。
+使用这个库非常简单。首先，你需要安装所需的依赖项。然后，你可以直接运行(模型名称)_main_run.py文件来使用该算法。例如，如果你想使用线性回归算法，你可以运行LinearRegression_main_run.py文件。
 
-同时，标准化在某些别的地方也有好处。有了标准化，用户就可以花费更少的时间来搜索他们需要的信息，他们同时可以做一个工具来从描述中搜集信息，自动跑示例代码，检查授权协议等等。
-
-这个仓库的目标是：
-
-1. 一个定义良好的**规范**。在仓库中的位置是 [spec.md](spec.md)。它是一个一直在持续优化的文档，欢迎您提 Issue 讨论其中的变化。
-2. 一个**示例 README**。这个 Readme 完全遵从 Standard-readme，而且在 `example-readmes` 文件夹里有更多的示例。
-3. 一个**语法提示器**用来提示在 Readme 中的语法错误。请参考 [tracking issue](https://github.com/RichardLitt/standard-readme/issues/5)。
-4. 一个**生成器**用来快速搭建新的 README 的框架。请参考 [generator-standard-readme](https://github.com/RichardLitt/generator-standard-readme)。
-5. 一个**标识准守规范的徽章**。请参考[徽章](#徽章)。
-
-## 安装
-
-这个项目使用 [node](http://nodejs.org) 和 [npm](https://npmjs.com)。请确保你本地安装了它们。
-
-```sh
-$ npm install --global standard-readme-spec
-```
-
-## 使用说明
-
-这只是一个文档包，你可以打印出 [spec.md](spec.md) 到输出窗口。
-
-```sh
-$ standard-readme-spec
-# Prints out the standard-readme spec
-```
-
-### 生成器
+### 注意事项
 
 想要使用生成器的话，请看 [generator-standard-readme](https://github.com/RichardLitt/generator-standard-readme)。
 有一个全局的可执行文件来运行包里的生成器，生成器的别名叫 `standard-readme`。
