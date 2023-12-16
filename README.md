@@ -25,7 +25,7 @@
 
 使用这个库非常简单。首先，你需要安装所需的依赖项。然后，你可以直接运行(模型名称)_main_run.py文件来使用该算法。例如，如果你想使用线性回归算法，你可以运行LinearRegression_main_run.py文件就可以得到相关算法对波士顿房价数据集的预测结果
 
-![Image text](https://github.com/c-q-nb/AlgorithmDemystified_is_all_you_need/tree/master/LinearRegression/img.png)
+![Image text](https://github.com/c-q-nb/AlgorithmDemystified_is_all_you_need/tree/master/LinearRegression/img.jpg)
 
 ### 注意事项
 
