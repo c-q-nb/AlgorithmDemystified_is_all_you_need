@@ -7,12 +7,8 @@
 - [项目背景](#项目背景)
 - [项目结构](#项目结构)
 - [如何使用](#如何使用)
-- [徽章](#徽章)
-- [示例](#示例)
-- [相关仓库](#相关仓库)
-- [维护者](#维护者)
-- [如何贡献](#如何贡献)
-- [使用许可](#使用许可)
+- [注意事项](#注意事项)
+- [贡献与改进](#贡献与改进)
 
 ## 项目背景
 
@@ -22,54 +18,26 @@
 项目的结构清晰且易于理解。每个算法都有一个单独的文件夹，文件夹的名字就是算法的名称。每个文件夹下都有两个Python文件：
 
 (模型名称)_main_run.py：这个文件主要负责数据的加载，预处理，模型的训练，预测以及结果的展示。它为用户提供了一个方便的使用界面，用户可以通过这个文件快速地使用该算法。
+
 (模型名称).py：这个文件是算法的核心实现。它包括模型的训练和预测功能。这个文件为那些希望深入了解算法工作原理的用户提供了详细的实现。
 
 ## 如何使用
 
-使用这个库非常简单。首先，你需要安装所需的依赖项。然后，你可以直接运行(模型名称)_main_run.py文件来使用该算法。例如，如果你想使用线性回归算法，你可以运行LinearRegression_main_run.py文件。
+使用这个库非常简单。首先，你需要安装所需的依赖项。然后，你可以直接运行(模型名称)_main_run.py文件来使用该算法。例如，如果你想使用线性回归算法，你可以运行LinearRegression_main_run.py文件就可以得到相关算法对波士顿房价数据集的预测结果
+
+![Image text](https://github.com/c-q-nb/AlgorithmDemystified_is_all_you_need/tree/master/LinearRegression/img.png)
 
 ### 注意事项
 
-想要使用生成器的话，请看 [generator-standard-readme](https://github.com/RichardLitt/generator-standard-readme)。
-有一个全局的可执行文件来运行包里的生成器，生成器的别名叫 `standard-readme`。
+1.在运行任何模型之前，请确保你的数据已经正确地加载和预处理。
 
-## 徽章
-如果你的项目遵循 Standard-Readme 而且项目位于 Github 上，非常希望你能把这个徽章加入你的项目。它可以更多的人访问到这个项目，而且采纳 Stand-README。 加入徽章**并非强制的**。 
+2.对于深度学习模型，可能需要较长的训练时间，取决于你的数据大小和硬件配置。
 
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+3.请确保你的环境满足所有依赖项的要求。
 
-为了加入徽章到 Markdown 文本里面，可以使用以下代码：
+4.如果相要知道算法的原理，需要掌握一定的线性代数、概率论与统计、高等数学、机器学习基本原理、一定的python代码基础能力。
 
-```
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-```
-
-## 示例
-
-想了解我们建议的规范是如何被应用的，请参考 [example-readmes](example-readmes/)。
-
-## 相关仓库
-
-- [Art of Readme](https://github.com/noffle/art-of-readme) — 💌 写高质量 README 的艺术。
-- [open-source-template](https://github.com/davidbgk/open-source-template/) — 一个鼓励参与开源的 README 模板。
-
-## 维护者
-
-[@RichardLitt](https://github.com/RichardLitt)。
-
-## 如何贡献
-
-非常欢迎你的加入！[提一个 Issue](https://github.com/RichardLitt/standard-readme/issues/new) 或者提交一个 Pull Request。
+## 贡献与改进
+我们欢迎任何形式的贡献，包括但不限于：新的算法实现，bug修复，性能优化，文档改进等。你可以通过Github仓库进行贡献，我们会在收到后尽快处理。
 
 
-标准 Readme 遵循 [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) 行为规范。
-
-### 贡献者
-
-感谢以下参与项目的人：
-<a href="graphs/contributors"><img src="https://opencollective.com/standard-readme/contributors.svg?width=890&button=false" /></a>
-
-
-## 使用许可
-
-[MIT](LICENSE) © Richard Littauer
