@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_boston
+from LstmRegression import MlpRegression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+
+
+# 加载波士顿房价数据集
+boston = load_boston()
+X, y = boston.data, boston.target
+
+# 数据预处理
+scaler = MinMaxScaler()
+X = scaler.fit_transform(X)
+y = y.reshape(-1, 1)
+
+
+# 划分训练集、验证集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+
+# 定义模型并训练
+model = MlpRegression(input_size=X_train.shape[1], hidden_size1=64, hidden_size2=32, output_size=1)
+model.fit(X_train, y_train, X_val, y_val, num_epochs=5000)
+
+# 在测试集上评估模型
+y_pred = model.predict(X_test)
+test_loss = model.mean_squared_error(y_test, y_pred)
+print(f"Test Loss: {test_loss}")
+
+# 创建一个图形框
+fig = plt.figure(figsize=(8, 6))
+# 在图形框里只画一幅图
+ax = fig.add_subplot(111)
+
+# 在图上画数据点
+ax.plot(y_pred, 'bo', label='Predictions')
+ax.plot(y_test, 'ro', label='Test Data')
+
+# 设置图形的标题以及x和y轴的标签
+ax.set_title('Predictions vs Test Data')
+ax.set_xlabel('Index')
+ax.set_ylabel('Value')
+# 设置图例
+ax.legend()
+# 显示图形
+plt.show()
