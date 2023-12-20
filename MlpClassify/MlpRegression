@@ -1,0 +1,114 @@
+
+class MlpRegression:
+    def __init__(self, input_size, hidden_size1, hidden_size2, output_size, learning_rate=0.001):
+        self.input_size = input_size  # 输入层大小
+        self.hidden_size1 = hidden_size1  # 隐藏层1大小
+        self.hidden_size2 = hidden_size2  # 隐藏层2大小
+        self.output_size = output_size  # 输出层大小
+        self.learning_rate = learning_rate  # 学习率
+
+        # 初始化权重和偏置
+        self.Wxh1, self.Whh1, self.Why1 = self.initialize_weights(input_size, hidden_size1, output_size)
+        self.bh1, self.by1 = np.zeros((1, hidden_size1)), np.zeros((1, output_size))
+        # 初始化权重和偏置
+        self.Wxh2, self.Whh2, self.Why2 = self.initialize_weights(hidden_size1, hidden_size2, output_size)
+        self.bh2, self.by2 = np.zeros((1, hidden_size2)), np.zeros((1, output_size))
+
+    def initialize_weights(self, input_size, hidden_size, output_size):
+        np.random.seed(42)
+        Wxh = np.random.randn(input_size, hidden_size) / np.sqrt(input_size)  # 初始化输入层到隐藏层的权重
+        Whh = np.random.randn(hidden_size, hidden_size) / np.sqrt(hidden_size)  # 初始化隐藏层到隐藏层的权重
+        Why = np.random.randn(hidden_size, output_size) / np.sqrt(hidden_size)  # 初始化隐藏层到输出层的权重
+        return Wxh, Whh, Why
+
+    # 添加LeakyReLU激活函数
+    def leaky_relu(self, x):
+        return np.maximum(0.01 * x, x)
+
+    # 添加损失函数（均方误差）
+    def mean_squared_error(self, y_true, y_pred):
+        return np.mean(np.square(y_true - y_pred))
+
+    # 添加优化器（随机梯度下降）
+    def sgd_optimizer(self, params, grads, learning_rate):
+        for param, grad in zip(params, grads):
+            param -= learning_rate * grad
+
+    def fit(self, X_train, y_train, X_val, y_val, num_epochs=1000):
+        best_val_loss = float('inf')  # 初始化最佳验证集损失值为正无穷大
+        best_val_loss_counter = 0  # 记录连续验证集损失值未改善的次数
+        for epoch in range(num_epochs):
+            # 前向传播
+            h1, h2, y_pred = self.forward_pass(X_train)
+
+            # 计算训练集和验证集的损失值
+            train_loss = self.mean_squared_error(y_train, y_pred)  # 训练集损失值
+            val_loss = self.mean_squared_error(y_val, X_val.dot(self.Wxh1).dot(self.Why1) + self.by1)  # 验证集损失值
+
+            if epoch % 50 == 0:
+                print(f"Epoch {epoch} - Train Loss: {train_loss}, Validation Loss: {val_loss}")
+
+            best_val_loss, best_val_loss_counter = self.evaluate_validation_loss(val_loss, best_val_loss,
+                                                                                 best_val_loss_counter)
+
+            # 反向传播并更新参数
+            self.backward_and_update(X_train, y_train, h1, h2, y_pred)
+
+    def forward_pass(self, X):
+        h1 = X.dot(self.Wxh1) + self.bh1  # 输入层到隐藏层1的线性变换
+        h1 = self.leaky_relu(h1)  # LeakyReLU激活函数
+        h2 = h1.dot(self.Wxh2) + self.bh2  # 隐藏层1到隐藏层2的线性变换
+        h2 = self.leaky_relu(h2)  # LeakyReLU激活函数
+        y_pred = h2.dot(self.Why2) + self.by2  # 隐藏层2到输出层的线性变换
+        return h1, h2, y_pred
+
+
+    def evaluate_validation_loss(self, val_loss, best_val_loss, best_val_loss_counter):
+        if val_loss < best_val_loss:  # 如果当前验证集损失小于最佳验证集损失
+            best_val_loss = val_loss  # 更新最佳验证集损失
+            best_val_loss_counter = 0  # 重置最佳验证集损失计数器
+        else:
+            best_val_loss_counter += 1  # 最佳验证集损失计数器加1
+            if best_val_loss_counter >= 100:  # 最佳验证集损失计数器达到100
+                return best_val_loss, best_val_loss_counter  # 返回最佳验证集损失和计数器
+        return best_val_loss, best_val_loss_counter  # 返回最佳验证集损失和计数器
+
+
+    def backward_and_update(self, X, y, h1, h2, y_pred):
+        # 计算输出层的梯度
+        grad_y_pred = 2 * (y_pred - y) / y.shape[0]  # 均方误差对输出层的导数
+
+        # 计算隐藏层2的梯度
+        grad_h2 = grad_y_pred.dot(self.Why2.T)  # 输出层对隐藏层2的导数
+        grad_h2[h2 < 0] *= 0.01  # LeakyReLU激活函数对于负值的导数
+
+        # 更新隐藏层2到输出层的参数
+        grad_Why2 = h2.T.dot(grad_y_pred)  # 损失函数对隐藏层2到输出层权重的梯度
+        grad_bh2 = np.sum(grad_y_pred, axis=0, keepdims=True)  # 损失函数对隐藏层2到输出层偏置的梯度
+        grad_Wxh2 = h1.T.dot(grad_h2)  # 损失函数对隐藏层2到隐藏层1权重的梯度
+        grad_bh2 = np.sum(grad_h2, axis=0, keepdims=True)  # 损失函数对隐藏层2到隐藏层1偏置的梯度
+
+        # 计算隐藏层1的梯度
+        grad_h1 = grad_h2.dot(self.Wxh2.T)  # 隐藏层2对隐藏层1的导数
+        grad_h1[h1 < 0] *= 0.01  # LeakyReLU激活函数对于负值的导数
+
+        # 更新隐藏层1到隐藏层2的参数
+        grad_Wxh1 = X.T.dot(grad_h1)  # 损失函数对隐藏层1到输入层权重的梯度
+        grad_bh1 = np.sum(grad_h1, axis=0, keepdims=True)  # 损失函数对隐藏层1到输入层偏置的梯度
+
+        # 参数更新
+        self.Wxh1 -= self.learning_rate * grad_Wxh1  # 权重更新
+        self.Whh1 -= self.learning_rate * h1.T.dot(grad_h1)  # 权重更新
+        self.Why1 -= self.learning_rate * h1.T.dot(grad_y_pred)  # 权重更新
+        self.bh1 -= self.learning_rate * grad_bh1  # 偏置更新
+        self.by1 -= self.learning_rate * np.sum(grad_y_pred, axis=0, keepdims=True)  # 偏置更新
+
+        self.Wxh2 -= self.learning_rate * grad_Wxh2  # 权重更新
+        self.Whh2 -= self.learning_rate * h2.T.dot(grad_h2)  # 权重更新
+        self.Why2 -= self.learning_rate * h2.T.dot(grad_y_pred)  # 权重更新
+        self.bh2 -= self.learning_rate * grad_bh2  # 偏置更新
+        self.by2 -= self.learning_rate * np.sum(grad_y_pred, axis=0, keepdims=True)  # 偏置更新
+
+    def predict(self, X):
+        h1, h2, y_pred = self.forward_pass(X)  # 前向传播
+        return y_pred  # 返回预测值
