@@ -1,0 +1,116 @@
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+
+class RNN:
+    def __init__(self, input_size, hidden_size, output_size, learning_rate, num_iterations):
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.learning_rate = learning_rate
+        self.num_iterations = num_iterations
+        
+        # 初始化网络权重和偏置参数
+        self.Wxh = np.random.randn(hidden_size, input_size) # 随机初始化输入到隐藏层的权重。
+        self.Whh = np.random.randn(hidden_size, hidden_size) # 随机初始化隐藏层到隐藏层的权重。
+        self.Why = np.random.randn(output_size, hidden_size) # 随机初始化隐藏层到输出层的权重。
+        self.bh = np.zeros((hidden_size, 1))
+        self.by = np.zeros((output_size, 1))
+        
+    def forward_backward_propagation(self, input_data, sequence_length):
+        # 前向传播
+        h_prev = np.zeros((self.hidden_size, 1))
+        outputs = []
+        for t in range(sequence_length-1):
+            x = np.array([[input_data[t]]])  # 当前时间步的输入
+            h = np.tanh(np.dot(self.Wxh, x) + np.dot(self.Whh, h_prev) + self.bh)  # 隐层状态
+            y = np.dot(self.Why, h) + self.by  # 输出
+            outputs.append(y)  # 保存每个时间步的输出
+            h_prev = h  # 更新隐层状态
+
+        # 计算损失
+        loss = 0
+        targets = np.array([input_data[1:]])  # 目标序列，即将输入序列向后移动一个时间步
+        for t in range(sequence_length - 1):
+            loss += np.square(outputs[t] - targets[:, t])  # 使用均方误差作为损失函数
+
+        # 反向传播
+        dWxh = np.zeros_like(self.Wxh)
+        dWhh = np.zeros_like(self.Whh)
+        dWhy = np.zeros_like(self.Why)
+        dbh = np.zeros_like(self.bh)
+        dby = np.zeros_like(self.by)
+        dh_next = np.zeros_like(h_prev)
+        for t in reversed(range(sequence_length-1)):
+            dy = 2 * (outputs[t] - targets[:, t])  # 输出误差
+            dWhy += np.dot(dy, h.T)  # 隐层到输出层的权重梯度累加
+            dby += dy  # 输出层偏置梯度累加
+            dh = np.dot(self.Why.T, dy) + dh_next  # 隐层误差
+            dh_raw = (1 - h * h) * dh  # 隐层状态未经过激活函数的梯度
+            dbh += dh_raw  # 隐层偏置梯度累加
+            dWxh += np.dot(dh_raw, x.T)  # 输入层到隐层的权重梯度累加
+            dWhh += np.dot(dh_raw, h_prev.T)  # 隐层到隐层的权重梯度累加
+            dh_next = np.dot(self.Whh.T, dh_raw)  # 上一个时间步的隐层误差
+
+            # 参数更新 遍历所有参数及其梯度,使用梯度下降更新参数。
+        for param, dparam in zip([self.Wxh, self.Whh, self.Why, self.bh, self.by], [dWxh, dWhh, dWhy, dbh, dby]):
+            param -= self.learning_rate * dparam
+
+        return loss
+        
+    def train(self, input_data, sequence_length):
+        # 使用Adam优化算法 初始化Adam算法中的一阶矩估计
+        mWxh, mWhh, mWhy, mbh, mby = np.zeros_like(self.Wxh), np.zeros_like(self.Whh), np.zeros_like(self.Why), np.zeros_like(self.bh), np.zeros_like(self.by)
+        # 初始化Adam算法中的二阶矩估计
+        vWxh, vWhh, vWhy, vbh, vby = np.zeros_like(self.Wxh), np.zeros_like(self.Whh), np.zeros_like(self.Why), np.zeros_like(self.bh), np.zeros_like(self.by)
+        # 初始化Adam算法的一阶矩估计指数衰减率 
+        beta1 = 0.9
+        # 初始化Adam算法的二阶矩估计指数衰减率
+        beta2 = 0.999
+        #初始化一个小的常数，用于数值稳定性
+        epsilon = 1e-8
+
+        # 迭代训练
+        for iteration in range(1, self.num_iterations+1):
+
+            # 前向传播和反向传播
+            loss = self.forward_backward_propagation(input_data, sequence_length)
+
+            # 使用Adam更新参数
+            for param, dparam, mparam, vparam in zip([self.Wxh, self.Whh, self.Why, self.bh, self.by], 
+                                                    [dWxh, dWhh, dWhy, dbh, dby],
+                                                    [mWxh, mWhh, mWhy, mbh, mby], 
+                                                    [vWxh, vWhh, vWhy, vbh, vby]):
+                mparam = beta1 * mparam + (1 - beta1) * dparam # 更新一阶矩估计
+                vparam = beta2 * vparam + (1 - beta2) * (dparam ** 2) # 更新二阶矩估计。
+                param -= self.learning_rate * mparam / (np.sqrt(vparam) + epsilon) # 使用Adam算法更新参数
+
+            # 每迭代100次打印一次结果
+            if iteration % 100 == 0:
+                print(f"Iteration: {iteration} Loss: {loss}")
+
+    def predict(self, input_data, sequence_length):
+        h_prev = np.zeros((self.hidden_size, 1))
+        predicted_outputs = []
+        for t in range(sequence_length):
+            x = np.array([[input_data[t]]])
+            h = np.tanh(np.dot(self.Wxh, x) + np.dot(self.Whh, h_prev) + self.bh)
+            y = np.dot(self.Why, h) + self.by
+            predicted_outputs.append(y)
+            h_prev = h
+
+        return predicted_outputs
+
+# 数据生成
+sequence_length = 100
+input_data = np.linspace(50,1000,100)
+
+# 创建RNN实例并训练模型
+rnn = RNN(input_size=1, hidden_size=32, output_size=1, learning_rate=0.001, num_iterations=10000)
+rnn.train(input_data, sequence_length)
+
+# 预测值比较
+predicted_outputs = rnn.predict(input_data, sequence_length)
+
+# 打印预测值和真实值的比较
+for i in range(sequence_length):
+    print(f"True value: {input_data[i]}, Predicted value: {predicted_outputs[i][0]}")
