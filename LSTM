@@ -1,0 +1,137 @@
+import numpy as np
+
+class LSTM:
+    def __init__(self, input_size, hidden_size, output_size):
+        self.input_size = input_size  # 输入数据的维度
+        self.hidden_size = hidden_size  # 隐藏状态的维度
+        self.output_size = output_size  # 输出数据的维度
+
+        # 初始化权重和偏置
+        self.Wf = np.random.randn(hidden_size, input_size + hidden_size)
+        # 为遗忘门的权重创建 hidden_size 行，input_size + hidden_size列的随机权重矩阵
+        self.bf = np.zeros((hidden_size, 1))
+        # 为遗忘门的偏置创建 hidden_size 行，1列的全零偏置向量
+
+        self.Wi = np.random.randn(hidden_size, input_size + hidden_size)
+        # 为输入门的权重创建 hidden_size 行，input_size + hidden_size列的随机权重矩阵
+        self.bi = np.zeros((hidden_size, 1))
+        # 为输入门的偏置创建 hidden_size 行，1列的全零偏置向量
+
+        self.Wo = np.random.randn(hidden_size, input_size + hidden_size)
+        # 为输出门的权重创建 hidden_size 行，input_size + hidden_size列的随机权重矩阵
+        self.bo = np.zeros((hidden_size, 1))
+        # 为输出门的偏置创建 hidden_size 行，1列的全零偏置向量
+
+        self.Wc = np.random.randn(hidden_size, input_size + hidden_size)
+        # 为细胞状态的权重创建 hidden_size 行，input_size + hidden_size列的随机权重矩阵
+        self.bc = np.zeros((hidden_size, 1))
+        # 为细胞状态的偏置创建 hidden_size 行，1列的全零偏置向量
+
+        self.Why = np.random.randn(output_size, hidden_size)
+        # 为输出的权重创建 output_size 行，hidden_size列的随机权重矩阵
+        self.by = np.zeros((output_size, 1))
+        # 为输出的偏置创建 output_size 行，1列的全零偏置向量
+
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))  # sigmoid 激活函数
+
+    def train(self, input_data, sequence_length, learning_rate, num_iterations):
+        loss_history = []  # 用于存储每次迭代的损失值
+
+        for iteration in range(num_iterations):
+            h_prev = np.zeros((self.hidden_size, 1))  # 初始化上一时间步的隐藏状态
+            c_prev = np.zeros((self.hidden_size, 1))  # 初始化上一时间步的细胞状态
+            outputs = []  # 存储每个时间步的输出
+
+            for t in range(sequence_length - 1):
+                x = np.array([[input_data[t]]])  # 当前时间步的输入数据
+                concat = np.concatenate((x, h_prev), axis=0)  # 将输入和隐藏状态连接起来作为 LSTM 的输入
+
+                # 计算遗忘门、输入门、输出门和细胞状态
+                ft = self.sigmoid(np.dot(self.Wf, concat) + self.bf)  
+                it = self.sigmoid(np.dot(self.Wi, concat) + self.bi)  
+                ot = self.sigmoid(np.dot(self.Wo, concat) + self.bo)  
+                c_tilda = np.tanh(np.dot(self.Wc, concat) + self.bc)  
+
+                c = ft * c_prev + it * c_tilda  # 根据 LSTM 的公式计算当前时间步的细胞状态
+                h = ot * np.tanh(c)  # 根据 LSTM 的公式计算当前时间步的隐藏状态
+
+                y = np.dot(self.Why, h) + self.by  # 计算当前时间步的输出
+                outputs.append(y)  # 将输出添加到列表中
+
+                h_prev = h  # 更新上一时间步的隐藏状态
+                c_prev = c  # 更新上一时间步的细胞状态
+
+            loss = 0  # 每次迭代的损失值
+            targets = np.array([input_data[1:]])  # 目标值
+
+            for t in range(sequence_length - 1):
+                loss += np.square(outputs[t] - targets[:, t])  # 计算损失
+
+            loss_history.append(loss)  # 将每次迭代的损失值添加到列表中
+
+      def predict(self, input_data):
+        h_prev = np.zeros((self.hidden_size, 1))
+        c_prev = np.zeros((self.hidden_size, 1))
+        predicted_outputs = []
+
+        # 对于输入数据的每个时间步
+        for t in range(len(input_data)):
+            x = np.array([[input_data[t]]])
+            # 将输入数据转换为形状为 (1, 1) 的数组
+            concat = np.concatenate((x, h_prev), axis=0)
+            # 将输入数据和上一个时间步的隐藏状态连接起来
+
+            # 计算遗忘门，输入门，输出门以及细胞状态的值
+            ft = self.sigmoid(np.dot(self.Wf, concat) + self.bf)
+            it = self.sigmoid(np.dot(self.Wi, concat) + self.bi)
+            ot = self.sigmoid(np.dot(self.Wo, concat) + self.bo)
+            c_tilda = np.tanh(np.dot(self.Wc, concat) + self.bc)
+
+            # 计算当前时间步的细胞状态和隐藏状态
+            c = ft * c_prev + it * c_tilda
+            h = ot * np.tanh(c)
+
+            # 计算当前时间步的输出值
+            y = np.dot(self.Why, h) + self.by
+            predicted_outputs.append(y)
+
+            # 更新上一个时间步的隐藏状态和细胞状态
+            h_prev = h
+            c_prev = c
+
+        return predicted_outputs
+
+# 定义输入数据
+input_data = np.linspace(50, 1000, 100)
+
+# 定义序列长度
+sequence_length = 100
+
+# 定义输入数据的维度
+input_size = 1
+
+# 定义隐藏状态的维度
+hidden_size = 32
+
+# 定义输出数据的维度
+output_size = 1
+
+# 定义学习率
+learning_rate = 0.01
+
+# 定义迭代次数
+num_iterations = 1000
+
+# 实例化 LSTM 对象
+lstm = LSTM(input_size, hidden_size, output_size)
+
+# 使用训练方法进行模型训练，并返回损失历史
+loss_history = lstm.train(input_data, sequence_length, learning_rate, num_iterations)
+
+# 使用预测方法进行模型预测
+predicted_outputs = lstm.predict(input_data)
+
+# 打印预测值和真实值的比较
+for i in range(sequence_length):
+    print(f"True value: {input_data[i]}, Predicted value: {predicted_outputs[i][0]}")
